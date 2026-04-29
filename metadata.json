@@ -1,0 +1,8 @@
+{
+  "name": "Konya Tarihi Mescitler Haritası",
+  "description": "Konya'daki tarihi mescitlerin konumlarını ve detaylarını gösteren interaktif rehber.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
