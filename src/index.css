@@ -33,3 +33,11 @@
   background: none;
   border: none;
 }
+
+.mosque-content p {
+  @apply mb-4;
+}
+
+.mosque-content p:last-child {
+  @apply mb-0;
+}

@@ -45,20 +45,10 @@ export default function MapPage() {
     const loadData = async () => {
       try {
         const data = await fetchMosques();
-        const results: Mosque[] = [];
-        
-        for (let i = 0; i < data.length; i++) {
-          const m = data[i];
-          setLoadingProgress(Math.round(((i + 1) / data.length) * 100));
-          
-          const coords = await geocodeAddress(m.address, m.district);
-          if (coords) {
-            results.push({ ...m, ...coords });
-          }
-          if (!coords) await new Promise(r => setTimeout(r, 100)); 
+        setMosques(data);
+        if (data.length > 0) {
+          setMapCenter([data[0].lat, data[0].lng]);
         }
-        
-        setMosques(results);
       } catch (error) {
         console.error('Error loading mosques:', error);
       } finally {
@@ -70,15 +60,13 @@ export default function MapPage() {
   }, []);
 
   const filteredMosques = mosques.filter(m => 
-    m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    m.district.toLowerCase().includes(searchQuery.toLowerCase())
+    m.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (m.description && m.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleSelectMosque = (mosque: Mosque) => {
-    if (mosque.lat && mosque.lng) {
-      setMapCenter([mosque.lat, mosque.lng]);
-      setSelectedMosque(mosque);
-    }
+    setMapCenter([mosque.lat, mosque.lng]);
+    setSelectedMosque(mosque);
   };
 
   return (
@@ -140,15 +128,16 @@ export default function MapPage() {
               >
                 <div className="flex justify-between items-start mb-2">
                   <span className={`text-[10px] font-bold uppercase tracking-widest font-sans ${
-                    selectedMosque?.id === m.id ? 'text-white/60' : 'text-editorial-secondary'
+                    selectedMosque?.id === m.id ? 'text-white/60' : 'text-editorial-accent'
                   }`}>
-                    {m.district}
+                    Tarihi Eser
                   </span>
                 </div>
                 <h3 className="font-serif text-lg mb-1 leading-tight">{m.name}</h3>
-                <p className={`text-xs font-sans italic opacity-70 line-clamp-1`}>
-                  {m.address}
-                </p>
+                <div 
+                  className={`text-xs font-sans italic opacity-70 line-clamp-2`}
+                  dangerouslySetInnerHTML={{ __html: m.description }}
+                />
               </motion.button>
             ))
           )}
@@ -226,22 +215,14 @@ export default function MapPage() {
                   </button>
                 </div>
                 
-                <div className="text-[11px] font-bold uppercase tracking-widest text-editorial-accent mb-2 font-sans">Aktif Seçim</div>
+                <div className="text-[11px] font-bold uppercase tracking-widest text-editorial-accent mb-2 font-sans">Eser Detayı</div>
                 <h3 className="text-3xl font-medium text-editorial-text mb-4 leading-tight">{selectedMosque.name}</h3>
                 
-                <div className="space-y-4 mb-8">
-                   <div className="flex gap-3 items-start">
-                     <MapPin className="w-4 h-4 text-editorial-secondary mt-1" />
-                     <p className="text-sm text-editorial-text/70 italic font-serif leading-relaxed">
-                       {selectedMosque.address}
-                     </p>
-                   </div>
-                   <div className="flex gap-3 items-center">
-                     <Phone className="w-4 h-4 text-editorial-secondary" />
-                     <p className="text-sm text-editorial-text/70 font-sans font-medium">
-                       {selectedMosque.phone}
-                     </p>
-                   </div>
+                <div className="space-y-4 mb-8 max-h-60 overflow-y-auto custom-scrollbar pr-4">
+                   <div 
+                     className="text-sm text-editorial-text/70 italic font-serif leading-relaxed mosque-content"
+                     dangerouslySetInnerHTML={{ __html: selectedMosque.description }}
+                   />
                 </div>
                 
                 <div className="h-px bg-editorial-primary/10 mb-6" />
